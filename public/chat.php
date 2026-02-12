@@ -17,7 +17,8 @@ require_once __DIR__ . '/../src/ShopifyProxyVerifier.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-Env::load(__DIR__ . '/../.env');
+$envPath = Env::get('APP_ENV_PATH', __DIR__ . '/../.env');
+Env::load($envPath ?? (__DIR__ . '/../.env'));
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ($method !== 'POST') {

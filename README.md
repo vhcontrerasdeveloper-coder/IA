@@ -114,3 +114,11 @@ Ejemplo mínimo (Liquid + JS):
 - Historial por cliente (Redis/DB)
 - FAQ semántica
 - Métricas de conversión por recomendación
+
+## 8) Deploy en public_html (cPanel/shared hosting)
+
+Para subirlo en hosting tradicional con `public_html` y mantener `.env` seguro, seguí la guía:
+
+- `DEPLOY_PUBLIC_HTML.md`
+
+Punto importante: **no pongas `.env` dentro de `public_html`**.
