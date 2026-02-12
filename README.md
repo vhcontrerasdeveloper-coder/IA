@@ -1,13 +1,13 @@
 # Asistente Chat IA para Shopify (PHP + Grok)
 
-Sí: este backend ya quedó preparado para **Grok (xAI)** en lugar de OpenAI.
+Sí: este backend está preparado para **Grok (xAI)** y ahora responde con foco en **bienestar** usando información real de catálogo.
 
 ## ¿Qué hace?
 
-- Expone `POST /chat.php` para recibir preguntas de clientes.
-- Toma productos recientes desde Shopify Admin API (GraphQL).
-- Arma contexto de catálogo.
-- Genera respuesta con Grok/xAI.
+- Expone `POST /chat.php` para preguntas de clientes.
+- Toma productos desde Shopify Admin API (GraphQL).
+- Usa título, descripción, tags, tipo y colecciones de cada producto.
+- Construye recomendaciones orientadas a bienestar.
 - Devuelve JSON (`answer`, `products_in_context`).
 
 ## 1) Requisitos
@@ -27,7 +27,7 @@ Completá:
 - `SHOPIFY_STORE_DOMAIN` (ej: `mitienda.myshopify.com`)
 - `SHOPIFY_ADMIN_ACCESS_TOKEN`
 - `SHOPIFY_API_VERSION` (ej: `2024-10`)
-- `SHOPIFY_APP_PROXY_SHARED_SECRET` (opcional, pero recomendado con App Proxy)
+- `SHOPIFY_APP_PROXY_SHARED_SECRET` (opcional, recomendado con App Proxy)
 - `GROK_API_KEY`
 - `GROK_MODEL` (ej: `grok-2-latest`)
 - `GROK_BASE_URL` (default: `https://api.x.ai/v1`)
@@ -43,32 +43,43 @@ Endpoint local:
 
 - `POST http://localhost:8080/chat.php`
 
-Body:
+Body ejemplo:
 
 ```json
 {
-  "question": "Busco zapatillas negras, cómodas y livianas"
+  "question": "Quiero mejorar descanso y estrés, ¿qué me recomendás?"
 }
 ```
 
-## 4) ¿Cómo lo integro en Shopify? (paso a paso)
+## 4) Recomendaciones orientadas a bienestar
+
+El asistente prioriza productos según:
+
+- Colecciones (ej: Relax, Sueño, Autocuidado, Fitness, Aromaterapia)
+- Descripción de producto (beneficios y usos declarados)
+- Tags y tipo de producto
+- Disponibilidad y rango de precio
+
+Importante: el asistente evita inventar beneficios médicos o datos no presentes.
+
+## 5) Integración en Shopify (paso a paso)
 
 ### Opción recomendada: App Proxy
 
-1. En tu app de Shopify, abrí **App setup > App proxy**.
-2. Configurá por ejemplo:
+1. En tu app de Shopify: **App setup > App proxy**.
+2. Configurá:
    - Subpath prefix: `apps`
    - Subpath: `ai-chat`
    - Proxy URL: `https://tu-backend.com/chat.php`
-3. Guardá y copiá el **shared secret** a `.env` en `SHOPIFY_APP_PROXY_SHARED_SECRET`.
-4. En tu theme, agregá un bloque/snippet con un input + botón para consultar.
-5. Hacé `fetch('/apps/ai-chat', { method: 'POST', ... })`.
+3. Guardá y copiá el shared secret en `SHOPIFY_APP_PROXY_SHARED_SECRET`.
+4. En el theme, agregá snippet/bloque con input y botón.
+5. Consumí el endpoint con `fetch('/apps/ai-chat', ...)`.
 
-Ejemplo mínimo para theme (Liquid + JS):
+Ejemplo mínimo (Liquid + JS):
 
 ```liquid
 <div id="ia-chat">
-  <input id="ia-q" type="text" placeholder="¿Qué estás buscando?" />
+  <input id="ia-q" type="text" placeholder="¿Qué objetivo de bienestar tenés?" />
   <button id="ia-send">Preguntar</button>
   <pre id="ia-out"></pre>
 </div>
@@ -90,20 +101,16 @@ Ejemplo mínimo para theme (Liquid + JS):
 </script>
 ```
 
-### Opción alternativa: endpoint directo
+## 6) Seguridad recomendada
 
-Si no usás App Proxy, podés llamar al backend directo (ej. Cloudflare/Nginx), pero tené en cuenta CORS, seguridad y rate limiting.
+- No exponer `SHOPIFY_ADMIN_ACCESS_TOKEN` ni `GROK_API_KEY` en frontend.
+- Mantener validación HMAC de App Proxy en producción.
+- Aplicar rate limiting.
+- Registrar errores sin secretos.
 
-## 5) Seguridad recomendada
+## 7) Próximas mejoras
 
-- No exponer jamás `SHOPIFY_ADMIN_ACCESS_TOKEN` ni `GROK_API_KEY` al frontend.
-- Mantener validación de firma App Proxy habilitada en producción.
-- Aplicar rate limiting (edge o servidor).
-- Loggear errores sin filtrar secretos.
-
-## 6) Próximas mejoras
-
+- Filtrar catálogo por colección objetivo (bienestar específico)
 - Historial por cliente (Redis/DB)
-- Reglas de negocio (envíos/cambios)
-- FAQ + búsqueda semántica
-- Tracking de métricas de conversación
+- FAQ semántica
+- Métricas de conversión por recomendación

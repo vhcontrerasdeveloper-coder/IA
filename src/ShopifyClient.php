@@ -31,6 +31,13 @@ query TopProducts($first: Int!) {
         description
         tags
         totalInventory
+        productType
+        collections(first: 6) {
+          nodes {
+            title
+            handle
+          }
+        }
         priceRangeV2 {
           minVariantPrice { amount currencyCode }
           maxVariantPrice { amount currencyCode }
