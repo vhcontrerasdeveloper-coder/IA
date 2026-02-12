@@ -122,3 +122,14 @@ Para subirlo en hosting tradicional con `public_html` y mantener `.env` seguro, 
 - `DEPLOY_PUBLIC_HTML.md`
 
 Punto importante: **no pongas `.env` dentro de `public_html`**.
+
+
+## 9) ¿Se puede sin carpetas fuera de `public_html`?
+
+Sí. También está soportado un despliegue **100% dentro de `public_html`**.
+
+- El endpoint detecta `./src` y `./.env` automáticamente.
+- Opcionalmente podés fijar rutas con `APP_SRC_PATH` y `APP_ENV_PATH`.
+- Ver guía: `DEPLOY_PUBLIC_HTML.md`.
+
+Recomendación: usar `.htaccess` para bloquear `.env`.

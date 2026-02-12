@@ -1,31 +1,34 @@
-# Deploy en `public_html` (cPanel/shared hosting)
+# Deploy en `public_html` (sin carpetas fuera)
 
-Esta guía te permite subir el asistente PHP a `public_html` **sin exponer secretos**.
+Sí, se puede desplegar **todo dentro de `public_html`**.
 
-## Estructura recomendada
+## Estructura sugerida (todo público, con protección)
 
 ```text
-/home/USUARIO/
-  ia-shopify/                 # código privado (fuera de web root)
-    src/
-    public/
-      chat.php
+public_html/
+  ia-chat/
+    chat.php
     .env
-  public_html/
-    ia-chat/                  # carpeta pública
-      chat.php -> symlink o copia desde ia-shopify/public/chat.php
+    .htaccess
+    src/
+      Env.php
+      Http.php
+      ShopifyClient.php
+      GrokClient.php
+      ChatAssistant.php
+      ShopifyProxyVerifier.php
 ```
-
-> Si no podés usar symlink en tu hosting, copiá `public/chat.php` dentro de `public_html/ia-chat/chat.php`.
 
 ## 1) Subir archivos
 
-1. Subí todo el repo a una carpeta privada, por ejemplo `/home/USUARIO/ia-shopify`.
-2. Publicá solo el endpoint `chat.php` en `public_html/ia-chat/chat.php`.
+Copiá a `public_html/ia-chat/`:
 
-## 2) Crear `.env` fuera de `public_html`
+- `public/chat.php` -> `public_html/ia-chat/chat.php`
+- carpeta `src/` completa -> `public_html/ia-chat/src/`
+- `.env` -> `public_html/ia-chat/.env`
+- `.htaccess` (para bloquear `.env`)
 
-Crear: `/home/USUARIO/ia-shopify/.env`
+## 2) Variables `.env`
 
 Ejemplo:
 
@@ -40,63 +43,46 @@ GROK_MODEL=grok-2-latest
 GROK_BASE_URL=https://api.x.ai/v1
 
 CHAT_MAX_PRODUCTS=8
-APP_ENV_PATH=/home/USUARIO/ia-shopify/.env
+APP_ENV_PATH=/home/USUARIO/public_html/ia-chat/.env
+APP_SRC_PATH=/home/USUARIO/public_html/ia-chat/src
 ```
 
-## 3) Configurar carga de `.env`
+> Si no querés rutas absolutas, podés dejar `APP_ENV_PATH` y `APP_SRC_PATH` vacías.
+> El endpoint detecta automáticamente `./.env` y `./src` cuando existen.
 
-El endpoint ahora soporta:
+## 3) Proteger `.env` y archivos sensibles
 
-- `APP_ENV_PATH` (si está definida, usa esa ruta)
-- fallback a `../.env`
+En `public_html/ia-chat/.htaccess`:
 
-En hosting compartido conviene fijar `APP_ENV_PATH` en el `.env` o como variable de entorno del panel.
+```apache
+Options -Indexes
 
-## 4) Ajustar `require_once` si moviste solo `chat.php`
+<Files ".env">
+  Require all denied
+</Files>
 
-Si `chat.php` quedó en `public_html/ia-chat/chat.php` y `src/` sigue fuera:
-
-```php
-require_once '/home/USUARIO/ia-shopify/src/Env.php';
-// ... resto de requires absolutos
+<FilesMatch "^(\.env|composer\.(json|lock)|\.git)">
+  Require all denied
+</FilesMatch>
 ```
 
-Alternativa mejor: mantener `public/` y `src/` juntos fuera de `public_html` y publicar con symlink/alias.
-
-## 5) Permisos
-
-- Archivos: `644`
-- Carpetas: `755`
-- `.env`: `600` o `640`
-
-## 6) Probar endpoint
+## 4) Probar endpoint
 
 ```bash
 curl -X POST "https://tudominio.com/ia-chat/chat.php" \
   -H "Content-Type: application/json" \
-  -d '{"question":"Quiero algo para relajarme"}'
+  -d '{"question":"Quiero algo para dormir mejor"}'
 ```
 
-## 7) Shopify App Proxy
+## 5) Shopify App Proxy
 
-En Shopify App:
+Configuración sugerida:
 
 - Subpath prefix: `apps`
 - Subpath: `ai-chat`
 - Proxy URL: `https://tudominio.com/ia-chat/chat.php`
 
-Y en el theme:
+## Nota de seguridad
 
-```js
-fetch('/apps/ai-chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ question: '¿Qué me recomendás para dormir mejor?' })
-})
-```
-
-## Seguridad clave
-
-- Nunca subas `.env` dentro de `public_html`.
-- Nunca expongas `SHOPIFY_ADMIN_ACCESS_TOKEN` o `GROK_API_KEY` en frontend.
-- Activá validación HMAC (`SHOPIFY_APP_PROXY_SHARED_SECRET`) en producción.
+Este modo funciona, pero es menos seguro que separar código privado fuera de `public_html`.
+Si podés, migrá luego a la versión con archivos sensibles fuera del web root.

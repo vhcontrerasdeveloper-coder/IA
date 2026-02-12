@@ -2,23 +2,28 @@
 
 declare(strict_types=1);
 
+$defaultSrcPath = is_dir(__DIR__ . '/src') ? __DIR__ . '/src' : __DIR__ . '/../src';
+$srcPath = getenv('APP_SRC_PATH');
+$srcPath = is_string($srcPath) && $srcPath !== '' ? rtrim($srcPath, '/\\') : $defaultSrcPath;
+
+require_once $srcPath . '/Env.php';
+require_once $srcPath . '/Http.php';
+require_once $srcPath . '/ShopifyClient.php';
+require_once $srcPath . '/GrokClient.php';
+require_once $srcPath . '/ChatAssistant.php';
+require_once $srcPath . '/ShopifyProxyVerifier.php';
+
 use IA\ChatAssistant;
 use IA\Env;
 use IA\GrokClient;
 use IA\ShopifyClient;
 use IA\ShopifyProxyVerifier;
 
-require_once __DIR__ . '/../src/Env.php';
-require_once __DIR__ . '/../src/Http.php';
-require_once __DIR__ . '/../src/ShopifyClient.php';
-require_once __DIR__ . '/../src/GrokClient.php';
-require_once __DIR__ . '/../src/ChatAssistant.php';
-require_once __DIR__ . '/../src/ShopifyProxyVerifier.php';
-
 header('Content-Type: application/json; charset=utf-8');
 
-$envPath = Env::get('APP_ENV_PATH', __DIR__ . '/../.env');
-Env::load($envPath ?? (__DIR__ . '/../.env'));
+$defaultEnvPath = is_file(__DIR__ . '/.env') ? __DIR__ . '/.env' : __DIR__ . '/../.env';
+$envPath = Env::get('APP_ENV_PATH', $defaultEnvPath);
+Env::load($envPath ?? $defaultEnvPath);
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ($method !== 'POST') {
