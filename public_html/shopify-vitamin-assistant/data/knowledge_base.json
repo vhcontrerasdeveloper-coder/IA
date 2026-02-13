@@ -1,0 +1,39 @@
+{
+  "assistant_rules": [
+    "Pregunta siempre por contexto: edad aproximada, objetivo y si toma medicamentos.",
+    "Ofrece máximo 3 recomendaciones por respuesta para no saturar.",
+    "Sugiere hábitos complementarios (agua, sueño, alimentación) junto con productos.",
+    "Si el cliente reporta embarazo, lactancia o condición médica compleja, indica validación profesional antes de suplementar.",
+    "Evita promesas absolutas y usa frases como 'puede apoyar', 'podría ayudar'."
+  ],
+  "symptom_protocols": [
+    {
+      "name": "Energía y fatiga",
+      "keywords": ["cansancio", "fatiga", "agotado", "sin energía", "debilidad"],
+      "goals": ["mejorar energía diaria", "reducir cansancio", "mejor desempeño mental"],
+      "suggested_ingredients": ["complejo B", "magnesio", "coenzima Q10", "vitamina C", "ginseng"],
+      "notes": "Confirmar horas de sueño y consumo de agua antes de recomendar dosis."
+    },
+    {
+      "name": "Defensas inmunes",
+      "keywords": ["gripa", "resfriado", "defensas", "inmunidad", "me enfermo seguido"],
+      "goals": ["fortalecer sistema inmune", "disminuir recurrencia de resfriados"],
+      "suggested_ingredients": ["vitamina C", "vitamina D3", "zinc", "equinácea", "propóleo"],
+      "notes": "Verificar duración y gravedad de síntomas para derivar si hay señales de alarma."
+    },
+    {
+      "name": "Estrés y sueño",
+      "keywords": ["estrés", "ansiedad", "insomnio", "duermo mal", "nervios"],
+      "goals": ["mejor descanso", "relajación", "equilibrio emocional"],
+      "suggested_ingredients": ["magnesio glicinato", "melatonina", "L-teanina", "ashwagandha", "valeriana"],
+      "notes": "Preguntar si maneja maquinaria o toma sedantes."
+    },
+    {
+      "name": "Digestión",
+      "keywords": ["inflamación", "colitis", "estreñimiento", "digestión", "gastritis", "gases"],
+      "goals": ["mejorar tránsito intestinal", "reducir inflamación digestiva"],
+      "suggested_ingredients": ["probióticos", "enzimas digestivas", "fibra", "menta", "jengibre"],
+      "notes": "Si hay dolor intenso, vómito persistente o sangre, sugerir evaluación médica urgente."
+    }
+  ]
+}
