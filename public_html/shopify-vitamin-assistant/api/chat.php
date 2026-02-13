@@ -46,7 +46,11 @@ try {
         Env::get('SHOPIFY_ADMIN_TOKEN', '') ?? '',
         Env::get('SHOPIFY_API_VERSION', '2026-01') ?? '2026-01',
         dirname(__DIR__) . '/cache',
-        (int) (Env::get('CATALOG_CACHE_TTL', '900') ?? 900)
+        (int) (Env::get('CATALOG_CACHE_TTL', '900') ?? 900),
+        Env::get('SHOPIFY_CLIENT_ID'),
+        Env::get('SHOPIFY_CLIENT_SECRET'),
+        Env::get('SHOPIFY_REFRESH_TOKEN'),
+        Env::get('SHOPIFY_OAUTH_TOKEN_URL')
     );
 
     $knowledge = new KnowledgeBase(dirname(__DIR__) . '/data/knowledge_base.json');

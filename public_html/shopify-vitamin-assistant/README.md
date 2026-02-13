@@ -12,9 +12,9 @@ Implementación lista para subir a `public_html`, pensada para una tienda de vit
 - PHP `8.1+` con extensión `curl` y `mbstring`.
 - Una custom app en Shopify con permisos de lectura de productos y colecciones.
 - Claves:
-  - `SHOPIFY_ADMIN_TOKEN`
   - `GROK_API_KEY`
   - `APP_API_KEY`
+  - Shopify: **o** `SHOPIFY_ADMIN_TOKEN` **o** combo OAuth (`SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `SHOPIFY_REFRESH_TOKEN`, `SHOPIFY_OAUTH_TOKEN_URL`)
 
 ## Estructura
 - `api/chat.php`: endpoint JSON para el widget.
@@ -46,19 +46,33 @@ En `theme.liquid` (antes de `</body>`):
 ```
 
 
-## ¿Qué token usar exactamente en `SHOPIFY_ADMIN_TOKEN`?
-- Debes usar **Admin API access token** de la Custom App (normalmente inicia con `shpat_`).
-- **No** uses `Client ID` ni `Client Secret` (`shpss_...`) en ese campo.
+## Autenticación Shopify (versión nueva y versión clásica)
+Este proyecto ahora soporta **dos formas**:
 
-Si en tu app solo ves `Client ID` y `Secret`, te falta instalar la app o abrir la sección correcta:
-1. Shopify Admin → **Settings** → **Apps and sales channels** → **Develop apps**.
-2. Abre tu app personalizada.
-3. En **Configuration**, agrega scopes Admin API (mínimo `read_products` y `read_collections`).
-4. Pulsa **Install app** (o **Reinstall app** si cambiaste scopes).
-5. Ve a **API credentials** → **Admin API access token** → **Reveal token once**.
-6. Copia ese valor `shpat_...` a `.env` en `SHOPIFY_ADMIN_TOKEN`.
+1. **Token fijo Admin API** (`SHOPIFY_ADMIN_TOKEN`):
+   - Si tienes un token Admin API ya emitido (por ejemplo en flujos clásicos), colócalo directo.
+2. **OAuth con refresh token** (Dev Dashboard nuevo):
+   - Si tu panel solo muestra `Client ID`, `Client Secret (shpss_...)` y `Refresh token`, configura:
+     - `SHOPIFY_CLIENT_ID`
+     - `SHOPIFY_CLIENT_SECRET`
+     - `SHOPIFY_REFRESH_TOKEN`
+     - `SHOPIFY_OAUTH_TOKEN_URL`
+   - El backend renovará automáticamente el access token y lo cacheará en `cache/shopify_oauth_token.json`.
 
-> Con los datos que compartiste (`Client ID` + `Secret shpss_...`), todavía **no** es el token que este script necesita para consultar Admin GraphQL.
+> Importante: `Client ID`, `Client Secret` y `Refresh token` **no** van en `SHOPIFY_ADMIN_TOKEN`.
+
+### Ejemplo `.env` para Shopify nuevo (Dev Dashboard)
+```env
+SHOPIFY_STORE_DOMAIN=tu-tienda.myshopify.com
+SHOPIFY_API_VERSION=2026-01
+SHOPIFY_ADMIN_TOKEN=
+SHOPIFY_CLIENT_ID=xxxxxxxx
+SHOPIFY_CLIENT_SECRET=shpss_xxxxxxxx
+SHOPIFY_REFRESH_TOKEN=xxxxxxxx
+SHOPIFY_OAUTH_TOKEN_URL=https://.../oauth/token
+```
+
+Si no sabes qué URL poner en `SHOPIFY_OAUTH_TOKEN_URL`, revisa la documentación de tu app en el panel de Shopify donde obtuviste `refresh token`.
 
 ## Endpoint
 `POST /shopify-vitamin-assistant/api/chat.php`
